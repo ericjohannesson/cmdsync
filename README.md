@@ -5,36 +5,27 @@ The script uses [GNU find](https://www.gnu.org/software/findutils/) for listing 
 
 ```
 USAGE:
-
   cmd-sync [<options>] <command> <path-to-source> <path-to-destination>
 
-  COMMANDS:
-
+  COMMANDS
     Any single-quoted shell-command containing '$IN' and '$OUT'.
 
-  OPTIONS:
-
+  OPTIONS
     --dry-run
-
-        Destination will not be modified.
+      Destination will not be modified.
 
     --ignore <path-to-file>
+      If file contains a list of regular expressions that can be
+      interpreted by grep, any file or directory matching such an
+      expression will be ignored.
 
-        If file contains a list of regular expressions that can be
-        interpreted by grep, any file or directory matching such an
-        expression will be ignored.
+  EXAMPLES
+    Make the destination identical to the source:
+      cmd-sync 'cp $IN $OUT' path/to/directory path/to/copied_directory
 
-  EXAMPLES:
+    Make the destination an encrypted version of the source:
+      cmd-sync 'gpg -e -r some@email.com -o $OUT $IN' path/to/directory path/to/encrypted_directory
 
-  - Make the destination identical to the source:
-
-    cmd-sync 'cp $IN $OUT' path/to/directory path/to/copied_directory
-
-  - Make the destination an encrypted version of the source:
-
-    cmd-sync 'gpg -e -r some@email.com -o $OUT $IN' path/to/directory path/to/encrypted_directory
-
-  - Make the destination a decrypted version of the source:
-
-    cmd-sync 'gpg -d -o $OUT $IN' path/to/encrypted_directory path/to/directory
+    Make the destination a decrypted version of the source:
+      cmd-sync 'gpg -d -o $OUT $IN' path/to/encrypted_directory path/to/directory
 ```

@@ -27,9 +27,6 @@ install: test
 	mkdir -p ~/bin
 	cp bin/cmd-sync ~/bin/cmd-sync
 
-uninstall:
-	rm ~/bin/cmd-sync
-
 debian/packages: debian test
 	cd debian
 	make packages

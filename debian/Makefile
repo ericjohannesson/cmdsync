@@ -13,12 +13,12 @@ clean:
 	# remove anything in .gitignore, including directories
 	git clean -fdX
 
-package = cmd-sync
+package = cmdsync
 version = 1.1
 release = 1
 architecture = all
 maintainer = Eric Johannesson <eric@ericjohannesson.com>
-homepage = https://github.com/ericjohannesson/cmd-sync
+homepage = https://github.com/ericjohannesson/cmdsync
 description = A bash-script for making the file structure of a *destination directory* identical to the file structure of a *source directory* (without changing the source), where each destination file is the result of applying a user-specified *shell command* to the corresponding source file.
 depends = bash, coreutils, findutils, diffutils, grep, sed
 
@@ -38,11 +38,11 @@ ${directory}/DEBIAN/control:
 	mkdir -p ${directory}/DEBIAN
 	echo "${control}" > ${directory}/DEBIAN/control
 
-${directory}/usr/bin/cmd-sync: ../bin/cmd-sync
+${directory}/usr/bin/cmdsync: ../bin/cmdsync
 	mkdir -p ${directory}/usr/bin
-	cp ../bin/cmd-sync ${directory}/usr/bin/cmd-sync
+	cp ../bin/cmdsync ${directory}/usr/bin/cmdsync
 
-${directory}: ${directory}/DEBIAN/control ${directory}/usr/bin/cmd-sync
+${directory}: ${directory}/DEBIAN/control ${directory}/usr/bin/cmdsync
 
 packages: ${directory}
 	dpkg-deb --root-owner-group --build ${directory}

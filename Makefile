@@ -10,12 +10,12 @@ MAKEFLAGS += --no-builtin-rules
 default:
 	@echo 'no default target'
 
-bin/cmd-sync: src/cmd-sync.sh
+bin/cmdsync: src/cmdsync.sh
 	mkdir -p bin
-	cp src/cmd-sync.sh bin/cmd-sync
-	chmod +x bin/cmd-sync
+	cp src/cmdsync.sh bin/cmdsync
+	chmod +x bin/cmdsync
 
-test: bin/cmd-sync
+test: bin/cmdsync
 	cd tests
 	bash test.sh
 	cd -
@@ -25,7 +25,7 @@ clean:
 
 install: test
 	mkdir -p ~/bin
-	cp bin/cmd-sync ~/bin/cmd-sync
+	cp bin/cmdsync ~/bin/cmdsync
 
 debian/packages: debian test
 	cd debian

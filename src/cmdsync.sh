@@ -111,6 +111,7 @@ cmdsync_make_files () {
             echo -ne "\rSYNCING: [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
             COUNT=$(($COUNT+1))
             eval "$cmdsync_CMD"
+            chmod --reference="$IN" "$OUT"
             touch "$OUT" -r "$IN"
         done < "$1"
         echo ""

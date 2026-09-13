@@ -27,7 +27,7 @@ install: test
 	mkdir -p ~/bin
 	cp bin/cmdsync ~/bin/cmdsync
 
-debian/packages: debian test
+debian/packages: debian bin/cmdsync
 	cd debian
 	make packages
 	cd -

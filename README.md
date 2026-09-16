@@ -4,7 +4,7 @@ A bash-script for making the file structure of a *destination directory* identic
 The script uses [GNU find](https://www.gnu.org/software/findutils/) for listing the path and modification-time of each file, and [GNU diff](https://www.gnu.org/software/diffutils/) for determining the least amount of changes required.
 
 ```
-Usage:
+USAGE:
   cmdsync [OPTIONS] --cmd COMMAND --src DIR --dest DIR
 
   COMMAND
@@ -19,7 +19,7 @@ Usage:
       interpreted by grep, any file or directory matching such an
       expression will be ignored.
 
-Examples:
+EXAMPLES:
   # Make the destination identical to the source:
     cmdsync \
       --cmd 'cp $IN $OUT' \

@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 #############################################################################
-# CMD-SYNC                                                                  #
+# cmdsync                                                                   #
 #                                                                           #
 # A bash-script for making the file structure of a destination directory    #
 # identical to the file structure of a source directory (without changing   #
@@ -12,7 +12,7 @@
 # each file, and GNU diff for determining the least amount of changes       #
 # required.                                                                 #
 #                                                                           #
-# Copyright (C) 2026  Eric Johannesson <eric@ericjohannesson.com>           #
+# Copyright (C) 2026 Eric Johannesson <eric@ericjohannesson.com>            #
 #############################################################################
 
 
@@ -24,8 +24,8 @@ cmdsync_SRC=""
 cmdsync_DEST=""
 
 cmdsync_print_usage () {
-    echo \
-"Usage:
+  echo \
+"USAGE:
   cmdsync [OPTIONS] --cmd COMMAND --src DIR --dest DIR
 
   COMMAND
@@ -40,7 +40,7 @@ cmdsync_print_usage () {
       interpreted by grep, any file or directory matching such an
       expression will be ignored.
 
-Examples:
+EXAMPLES:
   # Make the destination identical to the source:
     cmdsync \\
       --cmd 'cp \$IN \$OUT' \\
@@ -62,83 +62,89 @@ Examples:
 
 
 cmdsync_add_quotes () {
-    echo "$1" | sed 's/ \$IN / "$IN" /g' | sed 's/^\$IN /"$IN" /g' | sed 's/ \$IN$/ "$IN"/g' | sed 's/ \$OUT / "$OUT" /g' | sed 's/^\$OUT /"$OUT" /g' | sed 's/ \$OUT$/ "$OUT"/g'
+  echo "$1" \
+    | sed 's/ \$IN / "$IN" /g' \
+    | sed 's/^\$IN /"$IN" /g' \
+    | sed 's/ \$IN$/ "$IN"/g' \
+    | sed 's/ \$OUT / "$OUT" /g' \
+    | sed 's/^\$OUT /"$OUT" /g' \
+    | sed 's/ \$OUT$/ "$OUT"/g'
 }
 
 cmdsync_remove_dirs () {
-    local LINE
-    if [ "$cmdsync_DRY_RUN" -eq 0 ]
-    then
-        while read LINE
-        do
-            if [ -d "$cmdsync_DEST/$LINE" ]
-            then
-                rm -r "$cmdsync_DEST/$LINE"
-            fi
-        done < "$1"
-    fi
+  local LINE
+  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  then
+    while read LINE
+    do
+      if [ -d "$cmdsync_DEST/$LINE" ]
+      then
+        rm -r "$cmdsync_DEST/$LINE"
+      fi
+    done < "$1"
+  fi
 }
 
 
 cmdsync_make_dirs () {
-    local LINE
-    if [ "$cmdsync_DRY_RUN" -eq 0 ]
-    then
-        while read LINE
-        do
-            mkdir -p "$cmdsync_DEST/$LINE"
-        done < "$1"
-    fi
+  local LINE
+  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  then
+    while read LINE
+    do
+      mkdir -p "$cmdsync_DEST/$LINE"
+      done < "$1"
+  fi
 }
 
 cmdsync_remove_files () {
-    local LINE
-    if [ "$cmdsync_DRY_RUN" -eq 0 ]
-    then
-        while read LINE
-        do
-            rm "$cmdsync_DEST/$LINE"
-        done < "$1"
-    fi
+  local LINE
+  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  then
+    while read LINE
+    do
+      rm "$cmdsync_DEST/$LINE"
+      done < "$1"
+  fi
 }
 
 
 cmdsync_make_files () {
-    local LINE IN OUT RATIO
-    local FACTOR=20
-    local COUNT=1
-    local EMPTY=$(printf '.%.0s' {1..20})
-    local FULL=$(printf '#%.0s' {1..20})
+  local LINE IN OUT RATIO
+  local FACTOR=20
+  local COUNT=1
+  local EMPTY=$(printf '.%.0s' {1..20})
+  local FULL=$(printf '#%.0s' {1..20})
 
-    if [ "$cmdsync_DRY_RUN" -eq 0 ]
-    then
-        while read LINE
-        do
-            IN="$cmdsync_SRC/$LINE"
-            OUT="$cmdsync_DEST/$LINE"
-            RATIO=$(($COUNT*$FACTOR/$2))
-            echo -ne "\rSYNCING: [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
-            COUNT=$(($COUNT+1))
-            eval "$cmdsync_CMD"
-            chmod --reference="$IN" "$OUT"
-            touch "$OUT" -r "$IN"
-        done < "$1"
-        echo ""
-    fi
+  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  then
+    while read LINE
+    do
+      IN="$cmdsync_SRC/$LINE"
+      OUT="$cmdsync_DEST/$LINE"
+      RATIO=$(($COUNT*$FACTOR/$2))
+      echo -ne \
+        "\rSYNCING: [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
+      COUNT=$(($COUNT+1))
+      eval "$cmdsync_CMD"
+      chmod --reference="$IN" "$OUT"
+      touch "$OUT" -r "$IN"
+    done < "$1"
+    echo ""
+  fi
 }
 
 cmdsync_display_lines(){
-    sed 's/^/\t/' "$1"
+  sed 's/^/\t/' "$1"
 }
 
-cmdsync_number_of_lines(){
-    wc -l "$1" | cut -f 1 -d ' '
+cmdsync_nr_of_lines(){
+  wc -l "$1" | cut -f 1 -d ' '
 }
 
 
 cmdsync_parse () {
-  local CMD SRC DEST
-  local IGNOREFILE=""
+  local CMD SRC DEST IGNOREFILE
   while [[ $# -gt 0 ]]
   do
     case $1 in
@@ -216,88 +222,105 @@ cmdsync_parse () {
 
 
 cmdsync_main () {
+  local TEMP_DIR=$(mktemp -d)
+  local SRC_DIRS="$TEMP_DIR/src.dirs"
+  local DEST_DIRS="$TEMP_DIR/dest.dirs"
+  local SRC_FILES="$TEMP_DIR/src.files"
+  local DEST_FILES="$TEMP_DIR/dest.files"
+  local DEST_DIRS_REMOVED="$TEMP_DIR/dest.dirs.removed"
+  local DEST_DIRS_CREATED="$TEMP_DIR/dest.dirs.created"
+  local DEST_FILES_REMOVED="$TEMP_DIR/dest.files.removed"
+  local DEST_FILES_CREATED="$TEMP_DIR/dest.files.created"
+  local DEST_FILES_REALLY_REMOVED="$TEMP_DIR/dest.files.really.removed"
+  local DEST_FILES_REALLY_CREATED="$TEMP_DIR/dest.files.really.created"
+  local DEST_FILES_MODIFIED="$TEMP_DIR/dest.files.modified"
+  local NR_OF_FILES_CREATED
 
-    local TEMP_DIR=$(mktemp -d)
-    local SRC_DIRS="$TEMP_DIR/src.dirs"
-    local DEST_DIRS="$TEMP_DIR/dest.dirs"
-    local SRC_FILES="$TEMP_DIR/src.files"
-    local DEST_FILES="$TEMP_DIR/dest.files"
-    local DEST_DIRS_TO_BE_REMOVED="$TEMP_DIR/dest.dirs.to.be.removed"
-    local DEST_DIRS_TO_BE_CREATED="$TEMP_DIR/dest.dirs.to.be.created"
-    local DEST_FILES_TO_BE_REMOVED="$TEMP_DIR/dest.files.to.be.removed"
-    local DEST_FILES_TO_BE_CREATED="$TEMP_DIR/dest.files.to.be.created"
-    local DEST_FILES_TO_BE_REALLY_REMOVED="$TEMP_DIR/dest.files.to.be.really.removed"
-    local DEST_FILES_TO_BE_REALLY_CREATED="$TEMP_DIR/dest.files.to.be.really.created"
-    local DEST_FILES_TO_BE_MODIFIED="$TEMP_DIR/dest.files.to.be.modified"
-    local NR_OF_FILES_TO_BE_CREATED
+  local FORMAT="%P\t%T@\n"
 
-    local FORMAT="%P\t%T@\n"
+  if [ "$cmdsync_IGNOREFILE" = "" ]
+  then
+    find "$cmdsync_SRC" -type d -printf "%P\n"  | sort > "$SRC_DIRS"
+    find "$cmdsync_DEST" -type d -printf "%P\n" | sort > "$DEST_DIRS"
+  else
+    find "$cmdsync_SRC" -type d -printf "%P\n"  \
+      | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$SRC_DIRS"
+    find "$cmdsync_DEST" -type d -printf "%P\n" \
+      | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$DEST_DIRS"
+  fi
 
-    if [ "$cmdsync_IGNOREFILE" = "" ]
-    then
-        find "$cmdsync_SRC" -type d -printf "%P\n"  | sort > "$SRC_DIRS"
-        find "$cmdsync_DEST" -type d -printf "%P\n" | sort > "$DEST_DIRS"
-    else
-        find "$cmdsync_SRC" -type d -printf "%P\n"  | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$SRC_DIRS"
-        find "$cmdsync_DEST" -type d -printf "%P\n" | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$DEST_DIRS"
-    fi
+  diff "$SRC_DIRS" "$DEST_DIRS" | grep '^>' \
+    | cut -b 3- > "$DEST_DIRS_REMOVED"
+  diff "$SRC_DIRS" "$DEST_DIRS" | grep '^<' \
+    | cut -b 3- > "$DEST_DIRS_CREATED"
 
-    diff "$SRC_DIRS" "$DEST_DIRS" | grep '^>' | cut -b 3- > "$DEST_DIRS_TO_BE_REMOVED"
-    diff "$SRC_DIRS" "$DEST_DIRS" | grep '^<' | cut -b 3- > "$DEST_DIRS_TO_BE_CREATED"
+  echo DIRECTORIES REMOVED: $(cmdsync_nr_of_lines "$DEST_DIRS_REMOVED")
+  cmdsync_display_lines "$DEST_DIRS_REMOVED"
+  cmdsync_remove_dirs "$DEST_DIRS_REMOVED"
 
-    echo "DIRECTORIES REMOVED: $(cmdsync_number_of_lines "$DEST_DIRS_TO_BE_REMOVED")"
-    cmdsync_display_lines "$DEST_DIRS_TO_BE_REMOVED"
-    cmdsync_remove_dirs "$DEST_DIRS_TO_BE_REMOVED"
-
-    echo "DIRECTORIES CREATED: $(cmdsync_number_of_lines "$DEST_DIRS_TO_BE_CREATED")"
-    cmdsync_display_lines "$DEST_DIRS_TO_BE_CREATED"
-    cmdsync_make_dirs "$DEST_DIRS_TO_BE_CREATED"
-
-
-    if [ "$cmdsync_IGNOREFILE" = "" ]
-    then
-        find "$cmdsync_SRC" -type f -printf "$FORMAT"  | sort > "$SRC_FILES"
-        find "$cmdsync_DEST" -type f -printf "$FORMAT" | sort > "$DEST_FILES"
-    else
-        find "$cmdsync_SRC" -type f -printf "$FORMAT"  | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$SRC_FILES"
-        find "$cmdsync_DEST" -type f -printf "$FORMAT" | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$DEST_FILES"
-    fi
+  echo DIRECTORIES CREATED: $(cmdsync_nr_of_lines "$DEST_DIRS_CREATED")
+  cmdsync_display_lines "$DEST_DIRS_CREATED"
+  cmdsync_make_dirs "$DEST_DIRS_CREATED"
 
 
-    diff "$SRC_FILES" "$DEST_FILES" | grep '^>' | cut -b 3- | cut -f 1 > "$DEST_FILES_TO_BE_REMOVED"
-    diff "$SRC_FILES" "$DEST_FILES" | grep '^<' | cut -b 3- | cut -f 1 > "$DEST_FILES_TO_BE_CREATED"
+  if [ "$cmdsync_IGNOREFILE" = "" ]
+  then
+    find "$cmdsync_SRC" -type f -printf "$FORMAT"  \
+      | sort > "$SRC_FILES"
+    find "$cmdsync_DEST" -type f -printf "$FORMAT" \
+      | sort > "$DEST_FILES"
+  else
+    find "$cmdsync_SRC" -type f -printf "$FORMAT"  \
+      | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$SRC_FILES"
+    find "$cmdsync_DEST" -type f -printf "$FORMAT" \
+      | grep -f "$cmdsync_IGNOREFILE" -v | sort > "$DEST_FILES"
+  fi
 
-    diff "$DEST_FILES_TO_BE_CREATED" "$DEST_FILES_TO_BE_REMOVED" | grep '^>' | cut -b 3- | cut -f 1 > "$DEST_FILES_TO_BE_REALLY_REMOVED"
-    diff "$DEST_FILES_TO_BE_CREATED" "$DEST_FILES_TO_BE_REMOVED" | grep '^<' | cut -b 3- | cut -f 1 > "$DEST_FILES_TO_BE_REALLY_CREATED"
-    diff "$DEST_FILES_TO_BE_CREATED" "$DEST_FILES_TO_BE_REALLY_CREATED" | grep '^<' | cut -b 3- | cut -f 1 > "$DEST_FILES_TO_BE_MODIFIED"
 
-    echo "FILES REMOVED: $(cmdsync_number_of_lines "$DEST_FILES_TO_BE_REALLY_REMOVED")"
-    cmdsync_display_lines "$DEST_FILES_TO_BE_REALLY_REMOVED"
+  diff "$SRC_FILES" "$DEST_FILES" \
+    | grep '^>' | cut -b 3- | cut -f 1 > "$DEST_FILES_REMOVED"
+  diff "$SRC_FILES" "$DEST_FILES" \
+    | grep '^<' | cut -b 3- | cut -f 1 > "$DEST_FILES_CREATED"
 
-    echo "FILES CREATED: $(cmdsync_number_of_lines "$DEST_FILES_TO_BE_REALLY_CREATED")"
-    cmdsync_display_lines "$DEST_FILES_TO_BE_REALLY_CREATED"
+  diff "$DEST_FILES_CREATED" "$DEST_FILES_REMOVED" \
+    | grep '^>' | cut -b 3- | cut -f 1 > "$DEST_FILES_REALLY_REMOVED"
+  diff "$DEST_FILES_CREATED" "$DEST_FILES_REMOVED" \
+    | grep '^<' | cut -b 3- | cut -f 1 > "$DEST_FILES_REALLY_CREATED"
+  diff "$DEST_FILES_CREATED" "$DEST_FILES_REALLY_CREATED" \
+    | grep '^<' | cut -b 3- | cut -f 1 > "$DEST_FILES_MODIFIED"
 
-    echo "FILES MODIFIED: $(cmdsync_number_of_lines "$DEST_FILES_TO_BE_MODIFIED")"
-    cmdsync_display_lines "$DEST_FILES_TO_BE_MODIFIED"
+  echo FILES REMOVED: $(cmdsync_nr_of_lines "$DEST_FILES_REALLY_REMOVED")
+  cmdsync_display_lines "$DEST_FILES_REALLY_REMOVED"
 
-    cmdsync_remove_files "$DEST_FILES_TO_BE_REMOVED"
+  echo FILES CREATED: $(cmdsync_nr_of_lines "$DEST_FILES_REALLY_CREATED")
+  cmdsync_display_lines "$DEST_FILES_REALLY_CREATED"
 
-    NR_OF_FILES_TO_BE_CREATED="$(cmdsync_number_of_lines "$DEST_FILES_TO_BE_CREATED")"
+  echo FILES MODIFIED: $(cmdsync_nr_of_lines "$DEST_FILES_MODIFIED")
+  cmdsync_display_lines "$DEST_FILES_MODIFIED"
 
-    if [ $NR_OF_FILES_TO_BE_CREATED -gt 0 ]
-    then
-        cmdsync_make_files "$DEST_FILES_TO_BE_CREATED" "$NR_OF_FILES_TO_BE_CREATED"
-    fi
+  cmdsync_remove_files "$DEST_FILES_REMOVED"
 
-    rm -r "$TEMP_DIR"
+  NR_OF_FILES_CREATED=$(cmdsync_nr_of_lines "$DEST_FILES_CREATED")
+
+  if [ $NR_OF_FILES_CREATED -gt 0 ]
+  then
+    cmdsync_make_files "$DEST_FILES_CREATED" "$NR_OF_FILES_CREATED"
+  fi
+
+  rm -r "$TEMP_DIR"
 
 }
 
 
-set -eu # Abort if something fails
+set -e # Abort if something fails
 
-# Parse command-line arguments and set global variables:
-cmdsync_parse "$@"
+if [[ $# -gt 0 ]]
+then
+  # Parse command-line arguments and set global variables:
+  cmdsync_parse "$@"
+  # Start syncing
+  cmdsync_main
+else
+  cmdsync_print_usage
+fi
 
-# Start syncing:
-cmdsync_main

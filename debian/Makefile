@@ -14,7 +14,7 @@ clean:
 	git clean -fdX
 
 package = cmdsync
-version = 0
+version = 1
 release = 0
 architecture = all
 maintainer = Eric Johannesson <eric@ericjohannesson.com>
@@ -38,11 +38,16 @@ ${directory}/DEBIAN/control:
 	mkdir -p ${directory}/DEBIAN
 	echo "${control}" > ${directory}/DEBIAN/control
 
-${directory}/usr/bin/cmdsync: ../bin/cmdsync
+${directory}/usr/bin: ../bin/cmdsync
 	mkdir -p ${directory}/usr/bin
 	cp ../bin/cmdsync ${directory}/usr/bin/cmdsync
 
-${directory}: ${directory}/DEBIAN/control ${directory}/usr/bin/cmdsync
+${directory}/usr/share: ../src/bash-completion.sh
+	mkdir -p ${directory}/usr/share/bash-completion/completions
+	cp ../src/bash-completion.sh \
+		${directory}/usr/share/bash-completion/completions/cmdsync
+
+${directory}: ${directory}/DEBIAN/control ${directory}/usr/bin ${directory}/usr/share
 
 packages: ${directory}
 	dpkg-deb --root-owner-group --build ${directory}

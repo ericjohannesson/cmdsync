@@ -8,24 +8,24 @@
 _cmdsync () {
 
   local cur prev
-  local options='--cmd --src --dest --ignore --dry-run'
+  local options='--cmd --src --dest --ignore --dry-run --backup --suffix'
   COMPREPLY=()
   cur=${COMP_WORDS[COMP_CWORD]}
   prev=${COMP_WORDS[COMP_CWORD-1]}
 
   case $prev in
-    cmdsync )
+    'cmdsync')
       COMPREPLY=( $(compgen -W "${options}" -- ${cur}) )
       compopt +o nospace
       ;;
-    --cmd )
+    '--cmd' | '--suffix')
       COMPREPLY=()
       compopt +o nospace
       ;;
-    --src | --dest | --ignore )
+    '--src' | '--dest' | '--ignore' | '--backup')
       COMPREPLY=( $(compgen -f -- ${cur}) )
       ;;
-    * )
+    *)
       COMPREPLY=( $(compgen -W "${options}" -- ${cur}) )
       compopt +o nospace
       ;;

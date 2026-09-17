@@ -19,6 +19,14 @@ USAGE:
       interpreted by grep, any file or directory matching such an
       expression will be ignored.
 
+    --backup DIR
+      Save removed and modified files and directories in DIR,
+      suffixed with current universal time (unless otherwise
+      specified, see below).
+
+    --suffix STRING
+      Append STRING to the names of backed up files and directories.
+
 EXAMPLES:
   # Make the destination identical to the source:
     cmdsync \

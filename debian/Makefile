@@ -14,7 +14,7 @@ clean:
 	git clean -fdX
 
 package = cmdsync
-version = 1
+version = 2
 release = 0
 architecture = all
 maintainer = Eric Johannesson <eric@ericjohannesson.com>

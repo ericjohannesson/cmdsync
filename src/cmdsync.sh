@@ -18,7 +18,7 @@
 
 # global variables:
 cmdsync_IGNOREFILE=""
-cmdsync_DRY_RUN=0
+cmdsync_DRY_RUN="false"
 cmdsync_CMD=""
 cmdsync_SRC=""
 cmdsync_DEST=""
@@ -73,7 +73,7 @@ cmdsync_add_quotes () {
 
 cmdsync_remove_dirs () {
   local LINE
-  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  if [ "$cmdsync_DRY_RUN" = "false" ]
   then
     while read LINE
     do
@@ -88,7 +88,7 @@ cmdsync_remove_dirs () {
 
 cmdsync_make_dirs () {
   local LINE
-  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  if [ "$cmdsync_DRY_RUN" = "false" ]
   then
     while read LINE
     do
@@ -99,7 +99,7 @@ cmdsync_make_dirs () {
 
 cmdsync_remove_files () {
   local LINE
-  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  if [ "$cmdsync_DRY_RUN" = "false" ]
   then
     while read LINE
     do
@@ -116,7 +116,7 @@ cmdsync_make_files () {
   local EMPTY=$(printf '.%.0s' {1..20})
   local FULL=$(printf '#%.0s' {1..20})
 
-  if [ "$cmdsync_DRY_RUN" -eq 0 ]
+  if [ "$cmdsync_DRY_RUN" = "false" ]
   then
     while read LINE
     do
@@ -169,7 +169,7 @@ cmdsync_parse () {
         shift # past value
         ;;
       --dry-run)
-        cmdsync_DRY_RUN=1
+        cmdsync_DRY_RUN="true"
         shift # past argument
         ;;
       --help|-help|-h)
@@ -196,7 +196,7 @@ cmdsync_parse () {
   fi
   cmdsync_DEST=$(realpath "$DEST")
 
-  if [ "$cmdsync_DRY_RUN" -eq 1 ]
+  if [ "$cmdsync_DRY_RUN" = "true" ]
   then
     echo "DRY RUN (destination will not be modified)"
   fi
@@ -318,7 +318,7 @@ if [[ $# -gt 0 ]]
 then
   # Parse command-line arguments and set global variables:
   cmdsync_parse "$@"
-  # Start syncing
+  # Start syncing:
   cmdsync_main
 else
   cmdsync_print_usage

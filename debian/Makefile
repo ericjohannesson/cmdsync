@@ -42,10 +42,10 @@ ${directory}/usr/bin: ../bin/cmdsync
 	mkdir -p ${directory}/usr/bin
 	cp ../bin/cmdsync ${directory}/usr/bin/cmdsync
 
-${directory}/usr/share: ../src/bash-completion.sh
-	mkdir -p ${directory}/usr/share/bash-completion/completions
-	cp ../src/bash-completion.sh \
-		${directory}/usr/share/bash-completion/completions/cmdsync
+${directory}/usr/share: ../share
+	mkdir -p ${directory}/usr
+	cp ../share \
+		${directory}/usr/
 
 ${directory}: ${directory}/DEBIAN/control ${directory}/usr/bin ${directory}/usr/share
 

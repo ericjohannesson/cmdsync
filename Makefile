@@ -32,3 +32,8 @@ debian/packages: debian bin/cmdsync src/bash-completion.sh
 	make packages
 	cd -
 
+share: src/bash-completion.sh
+	mkdir -p share/bash-completion/completions
+	cp src/bash-completion.sh \
+		share/bash-completion/completions/cmdsync
+

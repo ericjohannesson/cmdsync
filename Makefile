@@ -23,7 +23,7 @@ test: bin/cmdsync
 clean:
 	git clean -fdX
 
-install: test
+install: bin/cmdsync
 	mkdir -p ~/bin
 	cp bin/cmdsync ~/bin/cmdsync
 

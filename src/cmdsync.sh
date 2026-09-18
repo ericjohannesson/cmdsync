@@ -147,7 +147,7 @@ cmdsync_make_files () {
       OUT="$cmdsync_DEST/$LINE"
       RATIO=$(($COUNT*$FACTOR/$2))
       echo -ne \
-        "\rSYNCING: [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
+        "\r  writing [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
       COUNT=$(($COUNT+1))
       eval "$cmdsync_CMD"
       chmod --reference="$IN" "$OUT"
@@ -158,7 +158,7 @@ cmdsync_make_files () {
 }
 
 cmdsync_display_lines(){
-  sed 's/^/\t/' "$1"
+  sed 's/^/  /' "$1"
 }
 
 cmdsync_nr_of_lines(){
@@ -313,6 +313,8 @@ cmdsync_main () {
   local NR_OF_FILES_CREATED=0
   local FORMAT="%P\t%T@\n"
 
+  ###################################################################
+  echo -n "Listing directories... "
   if [ "$cmdsync_IGNOREFILE" = "" ]; then
     find "$cmdsync_SRC" -type d -printf "%P\n" \
       | sort > "$SRC_DIRS"
@@ -334,19 +336,24 @@ cmdsync_main () {
     | grep '^<' \
     | cut -b 3- > "$DEST_DIRS_CREATED"
 
-  echo "DIRECTORIES REMOVED: $(cmdsync_nr_of_lines $DEST_DIRS_REMOVED)"
+  echo "Done."
+  echo "DIRECTORIES TO BE REMOVED ($(cmdsync_nr_of_lines $DEST_DIRS_REMOVED))"
   cmdsync_display_lines "$DEST_DIRS_REMOVED"
+  echo "DIRECTORIES TO BE CREATED ($(cmdsync_nr_of_lines $DEST_DIRS_CREATED))"
+  cmdsync_display_lines "$DEST_DIRS_CREATED"
+
+  ###################################################################
+  echo -n "Syncing directories... "
   if [ "$cmdsync_BACKUP" = "" ]; then
     cmdsync_remove_dirs "$DEST_DIRS_REMOVED"
   else
     cmdsync_move_dirs "$DEST_DIRS_REMOVED"
   fi
-
-  echo "DIRECTORIES CREATED: $(cmdsync_nr_of_lines $DEST_DIRS_CREATED)"
-  cmdsync_display_lines "$DEST_DIRS_CREATED"
   cmdsync_make_dirs "$DEST_DIRS_CREATED"
+  echo "Done."
 
-
+  ###################################################################
+  echo -n "Listing files... "
   if [ "$cmdsync_IGNOREFILE" = "" ]; then
     find "$cmdsync_SRC" -type f -printf "$FORMAT" \
       | sort > "$SRC_FILES"
@@ -360,7 +367,6 @@ cmdsync_main () {
       | grep -f "$cmdsync_IGNOREFILE" -v \
       | sort > "$DEST_FILES"
   fi
-
 
   diff "$SRC_FILES" "$DEST_FILES" \
     | grep '^>' \
@@ -384,27 +390,34 @@ cmdsync_main () {
     | cut -b 3- \
     | cut -f 1 > "$DEST_FILES_MODIFIED"
 
-  echo "FILES REMOVED: $(cmdsync_nr_of_lines $DEST_FILES_REALLY_REMOVED)"
+  echo "Done."
+
+  echo "FILES TO BE REMOVED ($(cmdsync_nr_of_lines $DEST_FILES_REALLY_REMOVED))"
   cmdsync_display_lines "$DEST_FILES_REALLY_REMOVED"
 
-  echo "FILES CREATED: $(cmdsync_nr_of_lines $DEST_FILES_REALLY_CREATED)"
+  echo "FILES TO BE CREATED ($(cmdsync_nr_of_lines $DEST_FILES_REALLY_CREATED))"
   cmdsync_display_lines "$DEST_FILES_REALLY_CREATED"
 
-  echo "FILES MODIFIED: $(cmdsync_nr_of_lines $DEST_FILES_MODIFIED)"
+  echo "FILES TO BE MODIFIED ($(cmdsync_nr_of_lines $DEST_FILES_MODIFIED))"
   cmdsync_display_lines "$DEST_FILES_MODIFIED"
 
-  NR_OF_FILES_CREATED=$(cmdsync_nr_of_lines "$DEST_FILES_CREATED")
 
+  ###################################################################
+  echo "Syncing files..."
   if [ "$cmdsync_BACKUP" = "" ]; then
     cmdsync_remove_files "$DEST_FILES_REMOVED"
-    cmdsync_make_files "$DEST_FILES_CREATED" "$NR_OF_FILES_CREATED"
   else
     cmdsync_move_files "$DEST_FILES_REMOVED"
-    cmdsync_make_files "$DEST_FILES_CREATED" "$NR_OF_FILES_CREATED"
   fi
 
-  rm -r "$TEMP_DIR"
+  NR_OF_FILES_CREATED=$(cmdsync_nr_of_lines "$DEST_FILES_CREATED")
+  if [ "$NR_OF_FILES_CREATED" -gt 0 ]; then
+    cmdsync_make_files "$DEST_FILES_CREATED" "$NR_OF_FILES_CREATED"
+  fi
+  echo "Done."
 
+  ###################################################################
+  rm -r "$TEMP_DIR"
 }
 
 

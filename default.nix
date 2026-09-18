@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
 pkgs.stdenv.mkDerivation {
-  name = "cmdsync";
+  pname = "cmdsync";
   version = "3";
   src = ./.;
   buildInputs = with pkgs; [

@@ -172,7 +172,7 @@ cmdsync_parse () {
   local SRC=""
   local DEST=""
   local IGNOREFILE=""
-  while [[ $# -gt 0 ]]; do
+  while [ "$#" -gt 0 ]; do
     case "$1" in
 
       '--cmd')
@@ -408,7 +408,7 @@ cmdsync_main () {
 }
 
 
-if [[ $# -gt 0 ]]; then
+if [ "$#" -gt 0 ]; then
   # Parse command-line arguments and set global variables:
   cmdsync_parse "$@"
   # Start syncing:

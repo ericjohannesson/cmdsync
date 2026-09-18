@@ -6,7 +6,7 @@
 # A bash-script for making the file structure of a destination directory   #
 # identical to the file structure of a source directory (without changing  #
 # the source), where each destination file is the result of applying a     #
-# user-specified shell command to the corresponding source file.           #
+# user-specified shell-command to the corresponding source file.           #
 #                                                                          #
 # The script uses GNU find for listing the path and modification-time of   #
 # each file, and GNU diff for determining the least amount of changes      #
@@ -18,7 +18,6 @@
 # Abort if something fails:
 set -e
 
-
 # Global variables:
 cmdsync_IGNOREFILE=""
 cmdsync_DRYRUN="false"
@@ -29,10 +28,16 @@ cmdsync_BACKUP=""
 cmdsync_SUFFIX=$(date --universal +'.%Y.%m.%d-%H.%M.%S-UTC')
 
 
+cmdsync_print_version () {
+  echo "cmdsync version 3"
+}
+
 cmdsync_print_usage () {
   echo \
 "USAGE:
   cmdsync [OPTIONS] --cmd COMMAND --src DIR --dest DIR
+  cmdsync --help
+  cmdsync --version
 
   COMMAND
     A single-quoted shell-command containing '\$IN' and '\$OUT'.
@@ -147,7 +152,7 @@ cmdsync_make_files () {
       OUT="$cmdsync_DEST/$LINE"
       RATIO=$(($COUNT*$FACTOR/$2))
       echo -ne \
-        "\r  applying COMMAND [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
+        "\r  applying command [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
       COUNT=$(($COUNT+1))
       eval "$cmdsync_CMD"
       chmod --reference="$IN" "$OUT"
@@ -236,8 +241,13 @@ cmdsync_parse () {
         shift
         ;;
 
-      '--help' | '-help' | '-h')
+      '--help')
         cmdsync_print_usage
+        exit 0
+        ;;
+
+      '--version')
+        cmdsync_print_version
         exit 0
         ;;
 

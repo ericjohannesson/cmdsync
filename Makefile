@@ -27,7 +27,7 @@ install: bin/cmdsync
 	mkdir -p ~/bin
 	cp bin/cmdsync ~/bin/cmdsync
 
-debian/packages: debian bin/cmdsync src/bash-completion.sh
+debian/packages: debian bin/cmdsync share
 	cd debian
 	make packages
 	cd -

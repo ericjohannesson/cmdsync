@@ -6,6 +6,8 @@ The script uses [GNU find](https://www.gnu.org/software/findutils/) for listing 
 ```
 USAGE:
   cmdsync [OPTIONS] --cmd COMMAND --src DIR --dest DIR
+  cmdsync --help
+  cmdsync --version
 
   COMMAND
     A single-quoted shell-command containing '$IN' and '$OUT'.

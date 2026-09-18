@@ -147,7 +147,7 @@ cmdsync_make_files () {
       OUT="$cmdsync_DEST/$LINE"
       RATIO=$(($COUNT*$FACTOR/$2))
       echo -ne \
-        "\r  writing [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
+        "\r  applying COMMAND [${FULL:0:RATIO}${EMPTY:RATIO:FACTOR}] $COUNT/$2\033[K"
       COUNT=$(($COUNT+1))
       eval "$cmdsync_CMD"
       chmod --reference="$IN" "$OUT"
@@ -252,7 +252,7 @@ cmdsync_parse () {
     echo "Error: No command specified" 1>&2
     exit 1
   fi
-  echo "COMMAND: '$CMD'"
+  echo "--cmd '$CMD'"
   cmdsync_CMD=$(cmdsync_quote "$CMD")
 
   if [ "$SRC" = "" ]; then
@@ -264,26 +264,29 @@ cmdsync_parse () {
     echo "Error: No such directory: '$SRC'" 1>&2
     exit 1
   fi
-  echo "SOURCE: $SRC"
+  echo "--src $SRC"
   cmdsync_SRC=$(realpath "$SRC")
 
   if [ "$DEST" = "" ]; then
     echo "Error: No destination directory specified" 1>&2
     exit 1
   fi
-  echo "DESTINATION: $DEST"
+  echo "--dest $DEST"
   mkdir -p "$DEST"
   cmdsync_DEST=$(realpath "$DEST")
 
   if [ ! "$BACKUP" = "" ]; then
-    echo "BACKUP: $BACKUP"
+    echo "--backup $BACKUP"
     mkdir -p "$BACKUP"
     cmdsync_BACKUP=$(realpath "$BACKUP")
+    if [ ! "$cmdsync_SUFFIX" = "" ]; then
+      echo "--suffix $cmdsync_SUFFIX"
+    fi
   fi
 
   if [ ! "$IGNOREFILE" = "" ]; then
     if [ -f "$IGNOREFILE" ]; then
-      echo "IGNOREFILE: $IGNOREFILE"
+      echo "--ignore $IGNOREFILE"
       cmdsync_IGNOREFILE=$(realpath "$IGNOREFILE")
     else
       echo "Error: No such file: '$IGNOREFILE'" 1>&2
@@ -292,8 +295,16 @@ cmdsync_parse () {
   fi
 
   if [ "$cmdsync_DRYRUN" = "true" ]; then
-    echo "DRY RUN (destination will not be modified)"
+    echo "--dry-run (destination will not be modified)"
   fi
+}
+
+cmdsync_destfiles_in_dirs () {
+  local LINE
+  while read LINE; do
+    find "$cmdsync_DEST/$LINE" -maxdepth 1 -type f -printf "$LINE/%P\n" \
+      | sort >> "$2"
+  done < "$1"
 }
 
 
@@ -307,10 +318,15 @@ cmdsync_main () {
   local DEST_DIRS_CREATED="$TEMP_DIR/dest.dirs.created"
   local DEST_FILES_REMOVED="$TEMP_DIR/dest.files.removed"
   local DEST_FILES_CREATED="$TEMP_DIR/dest.files.created"
-  local DEST_FILES_REALLY_REMOVED="$TEMP_DIR/dest.files.really.removed"
-  local DEST_FILES_REALLY_CREATED="$TEMP_DIR/dest.files.really.created"
+  local DEST_FILES_REMOVED_NOMOD="$TEMP_DIR/dest.files.removed.nomod"
+  local DEST_FILES_CREATED_NOMOD="$TEMP_DIR/dest.files.created.nomod"
   local DEST_FILES_MODIFIED="$TEMP_DIR/dest.files.modified"
+  local DEST_DIRFILES_REMOVED="$TEMP_DIR/dest.dirfiles.removed"
+  local NR_OF_DIRFILES_REMOVED=0
+  local NR_OF_FILES_REMOVED_NOMOD=0
   local NR_OF_FILES_CREATED=0
+  local NR_OF_FILES_REMOVED=0
+  local NR_OF_FILES_MODIFIED=0
   local FORMAT="%P\t%T@\n"
 
   ###################################################################
@@ -342,6 +358,10 @@ cmdsync_main () {
   echo "DIRECTORIES TO BE CREATED ($(cmdsync_nr_of_lines $DEST_DIRS_CREATED))"
   cmdsync_display_lines "$DEST_DIRS_CREATED"
 
+  # Listing files in removed directories
+  touch "$DEST_DIRFILES_REMOVED"
+  cmdsync_destfiles_in_dirs "$DEST_DIRS_REMOVED" "$DEST_DIRFILES_REMOVED"
+
   ###################################################################
   echo -n "Syncing directories... "
   if [ "$cmdsync_BACKUP" = "" ]; then
@@ -372,6 +392,7 @@ cmdsync_main () {
     | grep '^>' \
     | cut -b 3- \
     | cut -f 1 > "$DEST_FILES_REMOVED"
+
   diff "$SRC_FILES" "$DEST_FILES" \
     | grep '^<' \
     | cut -b 3- \
@@ -380,23 +401,29 @@ cmdsync_main () {
   diff "$DEST_FILES_CREATED" "$DEST_FILES_REMOVED" \
     | grep '^>' \
     | cut -b 3- \
-    | cut -f 1 > "$DEST_FILES_REALLY_REMOVED"
+    | cut -f 1 > "$DEST_FILES_REMOVED_NOMOD"
+
   diff "$DEST_FILES_CREATED" "$DEST_FILES_REMOVED" \
     | grep '^<' \
     | cut -b 3- \
-    | cut -f 1 > "$DEST_FILES_REALLY_CREATED"
-  diff "$DEST_FILES_CREATED" "$DEST_FILES_REALLY_CREATED" \
+    | cut -f 1 > "$DEST_FILES_CREATED_NOMOD"
+
+  diff "$DEST_FILES_CREATED" "$DEST_FILES_CREATED_NOMOD" \
     | grep '^<' \
     | cut -b 3- \
     | cut -f 1 > "$DEST_FILES_MODIFIED"
 
   echo "Done."
 
-  echo "FILES TO BE REMOVED ($(cmdsync_nr_of_lines $DEST_FILES_REALLY_REMOVED))"
-  cmdsync_display_lines "$DEST_FILES_REALLY_REMOVED"
+  NR_OF_DIRFILES_REMOVED=$(cmdsync_nr_of_lines $DEST_DIRFILES_REMOVED)
+  NR_OF_FILES_REMOVED_NOMOD=$(cmdsync_nr_of_lines $DEST_FILES_REMOVED_NOMOD)
+  NR_OF_FILES_REMOVED=$(( $NR_OF_FILES_REMOVED_NOMOD + $NR_OF_DIRFILES_REMOVED ))
+  echo "FILES TO BE REMOVED ($NR_OF_FILES_REMOVED)"
+  cmdsync_display_lines "$DEST_FILES_REMOVED_NOMOD"
+  cmdsync_display_lines "$DEST_DIRFILES_REMOVED"
 
-  echo "FILES TO BE CREATED ($(cmdsync_nr_of_lines $DEST_FILES_REALLY_CREATED))"
-  cmdsync_display_lines "$DEST_FILES_REALLY_CREATED"
+  echo "FILES TO BE CREATED ($(cmdsync_nr_of_lines $DEST_FILES_CREATED_NOMOD))"
+  cmdsync_display_lines "$DEST_FILES_CREATED_NOMOD"
 
   echo "FILES TO BE MODIFIED ($(cmdsync_nr_of_lines $DEST_FILES_MODIFIED))"
   cmdsync_display_lines "$DEST_FILES_MODIFIED"

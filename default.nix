@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {} }:
 pkgs.stdenv.mkDerivation {
   pname = "cmdsync";
-  version = "4";
+  version = "5";
   src = ./.;
   buildInputs = with pkgs; [
     coreutils

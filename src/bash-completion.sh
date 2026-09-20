@@ -8,7 +8,7 @@
 _cmdsync () {
 
   local cur prev
-  local options='--cmd --src --dest --ignore --dry-run --backup --suffix --version --help'
+  local options='--cmd --src --dest --ignore --dry-run --backup --suffix --version --help --quiet'
   COMPREPLY=()
   cur=${COMP_WORDS[COMP_CWORD]}
   prev=${COMP_WORDS[COMP_CWORD-1]}

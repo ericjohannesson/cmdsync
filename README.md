@@ -10,7 +10,10 @@ USAGE:
   cmdsync --version
 
   COMMAND
-    A single-quoted shell-command containing '$IN' and '$OUT'.
+    A single-quoted shell-command containing '$IN' and '$OUT',
+    which will be evaluated for each source file with its path
+    assigned to 'IN' and with the corresponding destination
+    path assigned to 'OUT'.
 
   OPTIONS
     --dry-run
@@ -24,10 +27,13 @@ USAGE:
     --backup DIR
       Save removed and modified files and directories in DIR,
       suffixed with current universal time (unless otherwise
-      specified, see below).
+      specified; see --suffix).
 
     --suffix STRING
       Append STRING to the names of backed up files and directories.
+
+    --quiet
+      Only report errors.
 
 EXAMPLES:
   # Make the destination identical to the source:
@@ -47,4 +53,12 @@ EXAMPLES:
       --cmd 'gpg -d -o $OUT $IN' \
       --src path/to/encrypted_directory \
       --dest path/to/directory
+
+  # Make the destination identical to the source, but keep
+    removed and modified files and directories in a backup:
+    cmdsync \
+      --cmd 'cp $IN $OUT' \
+      --src path/to/directory \
+      --dest path/to/copied_directory
+      --backup path/to/backup
 ```

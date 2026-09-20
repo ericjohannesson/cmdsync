@@ -59,6 +59,6 @@ EXAMPLES:
     cmdsync \
       --cmd 'cp $IN $OUT' \
       --src path/to/directory \
-      --dest path/to/copied_directory
+      --dest path/to/copied_directory \
       --backup path/to/backup
 ```

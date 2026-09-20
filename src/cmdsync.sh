@@ -29,7 +29,7 @@ cmdsync_SUFFIX=$(date --universal +'.%Y.%m.%d-%H.%M.%S-UTC')
 
 
 cmdsync_print_version () {
-  echo "cmdsync version 3"
+  echo 4
 }
 
 cmdsync_print_usage () {
@@ -340,7 +340,7 @@ cmdsync_main () {
   local FORMAT="%P\t%T@\n"
 
   ###################################################################
-  echo -n "Listing directories... "
+  echo -n "Comparing directories... "
   if [ "$cmdsync_IGNOREFILE" = "" ]; then
     find "$cmdsync_SRC" -type d -printf "%P\n" \
       | sort > "$SRC_DIRS"
@@ -383,7 +383,7 @@ cmdsync_main () {
   echo "Done."
 
   ###################################################################
-  echo -n "Listing files... "
+  echo -n "Comparing files... "
   if [ "$cmdsync_IGNOREFILE" = "" ]; then
     find "$cmdsync_SRC" -type f -printf "$FORMAT" \
       | sort > "$SRC_FILES"

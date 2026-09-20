@@ -5,17 +5,17 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
-.PHONY: default clean test install
+.PHONY: default clean test install uninstall
 
 default:
 	@echo 'no default target'
 
-bin/cmdsync: src/cmdsync.sh
+bin: src/cmdsync.sh
 	mkdir -p bin
 	cp src/cmdsync.sh bin/cmdsync
 	chmod +x bin/cmdsync
 
-test: bin/cmdsync
+test: bin
 	cd tests
 	bash test.sh
 	cd -
@@ -23,17 +23,24 @@ test: bin/cmdsync
 clean:
 	git clean -fdX
 
-install: bin/cmdsync
+install: bin share
 	mkdir -p ~/bin
-	cp bin/cmdsync ~/bin/cmdsync
+	cp -f bin/* ~/bin/
+	mkdir -p ~/.local/share/bash-completion/completions
+	cp -f share/bash-completion/completions/* \
+		~/.local/share/bash-completion/completions/
 
-debian/packages: debian bin/cmdsync share
+uninstall:
+	rm -f ~/bin/cmdsync
+	rm -f ~/.local/share/bash-completion/completions/cmdsync
+
+debian/packages: debian bin share
 	cd debian
 	make packages
 	cd -
 
 share: src/bash-completion.sh
 	mkdir -p share/bash-completion/completions
-	cp src/bash-completion.sh \
+	cp -f src/bash-completion.sh \
 		share/bash-completion/completions/cmdsync
 

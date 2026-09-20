@@ -14,7 +14,7 @@ clean:
 	git clean -fdX
 
 package = cmdsync
-version = 3
+version = $(shell ../bin/cmdsync --version)
 release = 0
 architecture = all
 maintainer = Eric Johannesson <eric@ericjohannesson.com>
@@ -38,9 +38,9 @@ ${directory}/DEBIAN/control:
 	mkdir -p ${directory}/DEBIAN
 	echo "${control}" > ${directory}/DEBIAN/control
 
-${directory}/usr/bin: ../bin/cmdsync
+${directory}/usr/bin: ../bin
 	mkdir -p ${directory}/usr/bin
-	cp ../bin/cmdsync ${directory}/usr/bin/cmdsync
+	cp ../bin/* ${directory}/usr/bin/
 
 ${directory}/usr/share: ../share
 	mkdir -p ${directory}/usr

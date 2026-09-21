@@ -24,14 +24,14 @@ clean:
 	git clean -fdX
 
 install: bin share
-	mkdir -p ~/bin
-	cp -f bin/* ~/bin/
+	mkdir -p ~/.local/bin
+	cp -f bin/* ~/.local/bin/
 	mkdir -p ~/.local/share/bash-completion/completions
 	cp -f share/bash-completion/completions/* \
 		~/.local/share/bash-completion/completions/
 
 uninstall:
-	rm -f ~/bin/cmdsync
+	rm -f ~/.local/bin/cmdsync
 	rm -f ~/.local/share/bash-completion/completions/cmdsync
 
 debian/packages: debian bin share

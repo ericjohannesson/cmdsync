@@ -15,7 +15,7 @@ bin: src/cmdsync.sh
 	cp src/cmdsync.sh bin/cmdsync
 	chmod +x bin/cmdsync
 
-test: bin
+test: tests src/cmdsync.sh
 	cd tests
 	bash test.sh
 	cd -

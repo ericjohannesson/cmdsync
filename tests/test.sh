@@ -13,14 +13,14 @@ diff -r --color expected_output/copied_files output/copied_files
 echo "# encrypt with --ignore:"
 ../bin/cmdsync \
   --ignore input/ignorefile \
-  --cmd 'gpg --encrypt --batch --yes --no-tty --quiet --recipient some@email.com --output $OUT $IN' \
+  --cmd 'gpg --symmetric --quiet --batch --yes --passphrase test --output $OUT $IN' \
   --src input/files \
   --dest output/encrypted_files
 
 echo "# decrypt with --ignore:"
 ../bin/cmdsync \
   --ignore input/ignorefile \
-  --cmd 'gpg --decrypt --batch --yes --skip-verify --quiet --output $OUT $IN' \
+  --cmd 'gpg --decrypt --quiet --batch --yes --passphrase test --output $OUT $IN' \
   --src output/encrypted_files \
   --dest output/files
 

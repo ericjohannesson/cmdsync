@@ -8,7 +8,7 @@ bash ../src/cmdsync.sh \
   --dest output/copied_files
 
 echo "# diff -r expected_output/copied_files output/copied_files:"
-diff -r --color expected_output/copied_files output/copied_files
+diff -r expected_output/copied_files output/copied_files
 
 echo "# encrypt with --ignore:"
 bash ../src/cmdsync.sh \
@@ -33,29 +33,37 @@ bash ../src/cmdsync.sh \
 
 
 echo "# diff -r expected_output/files output/files:"
-diff -r --color expected_output/files output/files
+diff -r expected_output/files output/files
 
 
-echo "# copy:"
+echo "# copy files:"
 bash ../src/cmdsync.sh \
   --cmd 'cp $IN $OUT' \
   --src input/files \
-  --dest output/new_files \
+  --dest output/files
 
-echo "# diff -r input/files output/new_files:"
-diff -r --color input/files output/new_files
-
-
-echo "# copy with --backup:"
+echo "# make changed_files:"
 bash ../src/cmdsync.sh \
   --cmd 'cp $IN $OUT' \
-  --src input/new_files \
-  --dest output/new_files \
+  --src input/files \
+  --dest input/changed_files
+
+rm -r 'input/changed_files/dir 2'
+rm 'input/changed_files/file 3'
+echo 'changed' >> 'input/changed_files/dir 1/file 3'
+
+echo "# copy changed_files with --backup:"
+bash ../src/cmdsync.sh \
+  --cmd 'cp $IN $OUT' \
+  --src input/changed_files \
+  --dest output/files \
   --backup output/backup \
   --suffix ".old"
 
-echo "# diff -r input/new_files output/new_files:"
-diff -r --color input/new_files output/new_files
+echo "# diff -r input/changed_files output/files:"
+diff -r input/changed_files output/files
 
 echo "# diff -r expected_output/backup output/backup:"
-diff -r --color expected_output/backup output/backup
+diff -r expected_output/backup output/backup
+
+rm -r input/changed_files output/files

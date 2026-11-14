@@ -2,3 +2,4 @@ bin/
 tests/output/
 share/
 result
+tests/input/changed_files/

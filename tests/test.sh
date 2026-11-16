@@ -22,18 +22,18 @@ bash ../src/cmdsync.sh \
   --ignore input/ignorefile \
   --cmd 'gpg --decrypt --quiet --batch --yes --passphrase test --output $OUT $IN' \
   --src output/encrypted_files \
-  --dest output/files
+  --dest output/decrypted_files
 
 echo "# redact with --dry-run:"
 bash ../src/cmdsync.sh \
   --dry-run \
   --cmd 'grep "hello" -v $IN > $OUT' \
   --src input/files \
-  --dest output/files
+  --dest output/decrypted_files
 
 
 echo "# diff -r expected_output/files output/files:"
-diff -r expected_output/files output/files
+diff -r expected_output/files output/decrypted_files
 
 
 echo "# copy files:"
@@ -66,4 +66,4 @@ diff -r input/changed_files output/files
 echo "# diff -r expected_output/backup output/backup:"
 diff -r expected_output/backup output/backup
 
-rm -r input/changed_files output/files
+

@@ -46,22 +46,22 @@ echo "# make changed_files:"
 bash ../src/cmdsync.sh \
   --cmd 'cp $IN $OUT' \
   --src input/files \
-  --dest input/changed_files
+  --dest output/changed_files
 
-rm -r 'input/changed_files/dir 2'
-rm 'input/changed_files/file 3'
-echo 'changed' >> 'input/changed_files/dir 1/file 3'
+rm -r 'output/changed_files/dir 2'
+rm 'output/changed_files/file 3'
+echo 'changed' >> 'output/changed_files/dir 1/file 3'
 
 echo "# copy changed_files with --backup:"
 bash ../src/cmdsync.sh \
   --cmd 'cp $IN $OUT' \
-  --src input/changed_files \
+  --src output/changed_files \
   --dest output/files \
   --backup output/backup \
   --suffix ".old"
 
-echo "# diff -r input/changed_files output/files:"
-diff -r input/changed_files output/files
+echo "# diff -r output/changed_files output/files:"
+diff -r output/changed_files output/files
 
 echo "# diff -r expected_output/backup output/backup:"
 diff -r expected_output/backup output/backup
